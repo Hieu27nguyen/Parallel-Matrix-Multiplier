@@ -1,0 +1,68 @@
+/*
+ *  prodcons header
+ *  Function prototypes, data, and constants for producer/consumer module
+ *
+ *  University of Washington, Tacoma
+ *  TCSS 422 - Operating Systems
+ *
+ *  Implements the producer-consumer synchronization model using pthreads,
+ *  condition variables, and mutex locks. This module is based on:
+ *  - OSTEP Chapter 30: "Concurrency and Synchronization" 
+ *    (Operating Systems: Three Easy Pieces by Remzi H. Arpaci-Dusseau)
+ *  - Lecture examples on multithreading and bounded buffer implementation
+ */
+#ifndef NUM_PRODUCERS
+#define NUM_PRODUCERS 4  // Change this number as needed
+#endif
+
+ #ifndef PRODCONS_H
+ #define PRODCONS_H
+ 
+ #include <pthread.h>
+ #include "matrix.h"
+ 
+ // Shared Bounded Buffer
+ extern Matrix **bigmatrix;  // Bounded buffer storing matrix pointers
+ extern int buffer_head;     // Points to the oldest element in buffer
+ extern int buffer_tail;     // Points to the next available slot
+ extern int buffer_count;    // Current count of matrices in buffer
+ 
+extern pthread_mutex_t buffer_mutex;
+extern Matrix *buffer[];  // The shared buffer
+extern int buffer_out;
+
+ 
+ // Synchronization variables for thread coordination
+ extern pthread_mutex_t buffer_lock;        // Mutex lock for critical secti extern pthread_cond_t buffer_not_full;     // Condition variable for producers
+ extern pthread_cond_t buffer_not_empty;    // Condition variable for consumers
+ 
+ /*
+  *  Data structure to track matrix production / consumption statistics.
+  *  - sumtotal: Total sum of all elements produced or consumed.
+  *  - multtotal: Total number of matrix multiplications performed.
+  *  - matrixtotal: Total number of matrices produced or consumed.
+  */
+ typedef struct prodcons {
+     int sumtotal;
+     int multtotal;
+     int matrixtotal;
+ } ProdConsStats;
+ 
+ /*
+  *  Function prototypes for producer and consumer worker threads.
+  *  These threads interact with the bounded buffer and perform matrix operations.
+  */
+ void *prod_worker(void *arg);
+ void *cons_worker(void *arg);
+ 
+ /*
+  *  Function prototypes for inserting and retrieving matrices 
+  *  from the shared bounded buffer. These functions ensure 
+  *  thread-safe access using mutex locks and condition variables.
+  */
+ int put(Matrix *value);   // Adds a matrix to the buffer (Producer)
+ Matrix *get();            // Retrieves a matrix from the buffer (Consumer)
+ 
+ #endif // PRODCONS_H
+ 
+Matrix* get();
